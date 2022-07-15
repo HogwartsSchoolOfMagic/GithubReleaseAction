@@ -17,7 +17,7 @@ const types = [
     {types: ['doc', 'docs'], header: 'Изменения в документации', icon: ':memo:'},
     {types: ['style'], header: 'Изменения стиля кода', icon: ':art:'},
     {types: ['chore'], header: 'Рутина', icon: ':wrench:'},
-    {types: ['c'], header: 'Остальные изменения', icon: ':flying_saucer:'}
+    {types: ['other'], header: 'Остальные изменения', icon: ':flying_saucer:'}
 ];
 
 // Выполнение основной логики github action для создания примечаний к выпуску.
@@ -42,20 +42,30 @@ async function main() {
         return core.setFailed('Не найдено коммитов с последнего тэга или с начала истории git!');
     }
 
-    /* Проверка коммитов на соблюдение стиля оформления сообщений */
-    const commitsParsed = checkingCommitsByConventional(commits);
-    if (commitsParsed.length < 1) {
+    // Проверка коммитов на соблюдение стиля оформления сообщений и формирование двух список: обычных коммитов и
+    // критическими изменениями.
+    const parsedObject = checkingCommitsByConventional(commits);
+    if (parsedObject.length < 1) {
         return core.setFailed(
             'С момента предыдущего тега или начала истории git не было проанализировано ни одного допустимого коммита!'
         );
     }
 
     /* Формирование изменений */
-    const changes = generateChanges(excludeTypes, commitsParsed, useIcons);
+    const changes = generateChanges(excludeTypes, parsedObject.commitsParsed, useIcons);
+
+    /* Формирование критических изменений */
+    let breakingChanges = parsedObject.breakingChanges;
+    if (breakingChanges.length > 0) {
+        generateBreakingChanges();
+    }
+
     if (changes.length > 0) {
         changes.push('');
     } else {
-        return core.warning('Нечего добавлять в список изменений из-за списка исключенных типов сообщений коммитов.');
+        return core.warning(
+            'Нечего добавлять в список изменений из-за списка исключенных типов сообщений коммитов.'
+        );
     }
 
     changes.forEach(change => {
@@ -167,19 +177,32 @@ async function findReleaseCommits(gh, owner, repo, latestTag) {
 }
 
 function checkingCommitsByConventional(commits) {
-    const commitsParsed = [];
+    const parsed = [];
+    const breaking = []
     for (const commit of commits) {
         try {
             // noinspection JSUnresolvedVariable
             const cAst = commitChecker.toConventionalChangelogFormat(commitChecker.parser(commit.messageHeadline));
             // noinspection JSUnresolvedVariable
-            commitsParsed.push({
+            parsed.push({
                 ...cAst,
                 sha: commit.oid,
                 url: commit.commitUrl,
                 author: commit.committer.user.login,
                 authorUrl: commit.committer.user.url
             });
+            for (const note of cAst.notes) {
+                if (note.title === 'BREAKING CHANGE') {
+                    breaking.push({
+                        sha: commit.sha,
+                        url: commit.html_url,
+                        subject: cAst.subject,
+                        author: commit.author.login,
+                        authorUrl: commit.author.html_url,
+                        text: note.text
+                    })
+                }
+            }
             core.info(`[УСПЕХ] Коммит ${commit.oid} типа ${cAst.type} в области ${cAst.scope} - ${cAst.subject}`);
         } catch (err) {
             core.warning(
@@ -187,7 +210,10 @@ function checkingCommitsByConventional(commits) {
             );
         }
     }
-    return commitsParsed;
+    return {
+        commitsParsed: parsed,
+        breakingChanges: breaking
+    };
 }
 
 function generateChanges(excludeTypes, commitsParsed, useIcons) {
@@ -230,6 +256,20 @@ function generateChanges(excludeTypes, commitsParsed, useIcons) {
         idx++;
     }
     return changes;
+}
+
+function generateBreakingChanges(changes, breakingChanges, useIcons) {
+    changes.push('')
+    let breakingChangeTitle = 'КРИТИЧЕСКИЕ ИЗМЕНЕНИЯ';
+    changes.push(useIcons ? '### :boom: ' + breakingChangeTitle : '### ' + breakingChangeTitle);
+    for (const breakChange of breakingChanges) {
+        const body = breakChange.text.split('\n').map(ln => `  ${ln}`).join('  \n');
+        const subject = buildSubject({
+            subject: breakChange.subject,
+            author: breakChange.author
+        });
+        changes.push(`- из-за [\`${breakChange.sha.substring(0, 7)}\`](${breakChange.url}) - ${subject}:\n\n${body}\n`);
+    }
 }
 
 function buildSubject({subject, author}) {
