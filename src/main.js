@@ -244,7 +244,7 @@ function generateChanges(commitsParsed) {
             changes.push('');
         }
 
-        changes.push(useIcons ? `### ${group.icon} ${group.header}` : `### ${group.header}`)
+        changes.push(useIcons ? `### ${group.icon} ${group.title}` : `### ${group.title}`)
         for (const commit of matchingCommits) {
             const scope = commit.scope ? `**${commit.scope}**: ` : ''
             const subject = buildSubject({
