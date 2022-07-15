@@ -27396,8 +27396,8 @@ function checkingCommitsByConventional(commits) {
             });
             core.info(`[УСПЕХ] Коммит ${commit.oid} типа ${cAst.type} в области ${cAst.scope} - ${cAst.subject}`);
         } catch (err) {
-            core.info(
-                `[НЕУДАЧА] Пропуск коммита ${commit.sha} поскольку он не соответствует стандартному формату коммита.`
+            core.warning(
+                `[НЕУДАЧА] Пропуск коммита ${commit.oid} поскольку он не соответствует стандартному формату коммита.`
             );
         }
     }
