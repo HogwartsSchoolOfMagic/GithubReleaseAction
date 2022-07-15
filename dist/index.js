@@ -27395,6 +27395,7 @@ function checkingCommitsByConventional(commits) {
                 authorUrl: commit.committer.user.url
             });
             core.info(`[УСПЕХ] Коммит ${commit.oid} типа ${cAst.type} в области ${cAst.scope} - ${cAst.subject}`);
+            core.info(`${JSON.stringify(cAst)}`);
         } catch (err) {
             core.warning(
                 `[НЕУДАЧА] Пропуск коммита ${commit.oid} поскольку он не соответствует стандартному формату коммита.`
