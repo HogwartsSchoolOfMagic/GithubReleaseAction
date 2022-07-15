@@ -1,36 +1,40 @@
+/* Используемые библиотеки */
 const github = require('@actions/github');
 const core = require('@actions/core');
 const lodash = require('lodash');
 const commitChecker = require('@conventional-commits/parser');
 const yaml = require('js-yaml');
-const fs   = require('fs');
+const fs = require('fs');
 
+/* Встроенные настройки */
 const rePrEnding = /\(#(\d+)\)$/;
 
-const types = [
-    {types: ['feat', 'feature'], header: 'Новая функциональность', icon: ':sparkles:'},
-    {types: ['fix', 'bugfix'], header: 'Исправление багов', icon: ':bug:'},
-    {types: ['perf', 'optimize'], header: 'Повышение производительности', icon: ':zap:'},
-    {types: ['refactor', 'code-clean'], header: 'Рефакторинг', icon: ':recycle:'},
-    {types: ['test', 'tests'], header: 'Тесты', icon: ':white_check_mark:'},
-    {types: ['build', 'ci'], header: 'Сборка системы', icon: ':construction_worker:'},
-    {types: ['doc', 'docs'], header: 'Изменения в документации', icon: ':memo:'},
-    {types: ['style'], header: 'Изменения стиля кода', icon: ':art:'},
-    {types: ['chore'], header: 'Рутина', icon: ':wrench:'},
-    {types: ['other'], header: 'Остальные изменения', icon: ':flying_saucer:'},
-    {types: ['revert'], header: 'Откат изменений', icon: ':x:'}
-];
+/* Глобальные данные для выполнения github действия */
+let configFile;
+let owner;
+let repo;
+let gh;
+let useIcons;
+
+function initVariables() {
+    owner = github.context.repo.owner;
+    repo = github.context.repo.repo;
+    gh = github.getOctokit(core.getInput('gh-token'));
+    useIcons = core.getBooleanInput('use-icons');
+
+    /* Получение конфигурационного файла */
+    try {
+        configFile = yaml.load(fs.readFileSync('./.github/config/default-config.yml', 'utf8'));
+    } catch (e) {
+        core.warning(e);
+    }
+}
 
 // Выполнение основной логики github action для создания примечаний к выпуску.
 async function main() {
-    const ghToken = core.getInput('gh-token');
-    const owner = github.context.repo.owner;
-    const repo = github.context.repo.repo;
-    const gh = github.getOctokit(ghToken);
-    const excludeTypes = (core.getInput('exclude-types') || '').split(',').map(t => t.trim());
-    const useIcons = core.getBooleanInput('use-icons');
+    initVariables();
 
-    const latestTag = await findLatestTag(gh, owner, repo);
+    const latestTag = await findLatestTag();
     if (latestTag) {
         core.info(`Используется, для поиска истории, тэг: ${latestTag.name}, и SHA: ${latestTag.target.oid}.`);
     } else {
@@ -38,7 +42,7 @@ async function main() {
     }
 
     /* Поиск истории коммитов */
-    const commits = await findReleaseCommits(gh, owner, repo, latestTag);
+    const commits = await findReleaseCommits(latestTag);
     if (!commits || commits.length < 1) {
         return core.setFailed('Не найдено коммитов с последнего тэга или с начала истории git!');
     }
@@ -53,12 +57,12 @@ async function main() {
     }
 
     /* Формирование изменений */
-    let changes = generateChanges(excludeTypes, parsedObject.commitsParsed, useIcons);
+    let changes = generateChanges(parsedObject.commitsParsed);
 
     /* Формирование критических изменений */
     let breakingChanges = parsedObject.breakingChanges;
     if (breakingChanges.length > 0) {
-        changes = generateBreakingChanges(changes, breakingChanges, useIcons);
+        changes = generateBreakingChanges(changes, breakingChanges);
     }
 
     if (changes.length === 0) {
@@ -74,7 +78,7 @@ async function main() {
     core.setOutput('changelog', changes.join('\n'));
 }
 
-async function findLatestTag(gh, owner, repo) {
+async function findLatestTag() {
     const query = `
         query findLastTag($owner: String!, $repo: String!) {
           repository(owner: $owner, name: $repo) {
@@ -104,7 +108,7 @@ async function findLatestTag(gh, owner, repo) {
     return !tagInfo ? null : tagInfo;
 }
 
-async function findCommitPage(gh, owner, repo, endCursor) {
+async function findCommitPage(endCursor) {
     let after = endCursor ? `, after: "${endCursor}"` : ``;
 
     const query = `
@@ -150,12 +154,12 @@ async function findCommitPage(gh, owner, repo, endCursor) {
     return commitHistory == null ? null : commitHistory;
 }
 
-async function findReleaseCommits(gh, owner, repo, latestTag) {
+async function findReleaseCommits(latestTag) {
     const commits = [];
     let hasNextPage = false;
     let pageAfter = null;
     do {
-        let commitsHistory = await findCommitPage(gh, owner, repo, pageAfter);
+        let commitsHistory = await findCommitPage(pageAfter);
         // noinspection JSUnresolvedVariable
         hasNextPage = commitsHistory.pageInfo.hasNextPage;
         // noinspection JSUnresolvedVariable
@@ -221,25 +225,17 @@ function checkingCommitsByConventional(commits) {
     };
 }
 
-function generateChanges(excludeTypes, commitsParsed, useIcons) {
+function generateChanges(commitsParsed) {
     const changes = [];
     let idx = 0;
 
-    // Get document, or throw exception on error
-    let doc;
-    try {
-        doc = yaml.load(fs.readFileSync('./.github/config/default-config.yml', 'utf8'));
-        core.info(JSON.stringify(doc));
-    } catch (e) {
-        core.warning(e);
-    }
-
-    for (const type of types) {
-        if (lodash.intersection(type.types, excludeTypes).length > 0) {
+    for (const group of configFile.groups) {
+        // noinspection JSUnresolvedVariable
+        if (lodash.intersection(group.types, configFile.excludeTypes).length > 0) {
             continue;
         }
 
-        const matchingCommits = commitsParsed.filter(commitParsed => type.types.includes(commitParsed.type))
+        const matchingCommits = commitsParsed.filter(commitParsed => group.types.includes(commitParsed.type))
         if (matchingCommits.length < 1) {
             continue;
         }
@@ -248,7 +244,7 @@ function generateChanges(excludeTypes, commitsParsed, useIcons) {
             changes.push('');
         }
 
-        changes.push(useIcons ? `### ${type.icon} ${type.header}` : `### ${type.header}`)
+        changes.push(useIcons ? `### ${group.icon} ${group.header}` : `### ${group.header}`)
         for (const commit of matchingCommits) {
             const scope = commit.scope ? `**${commit.scope}**: ` : ''
             const subject = buildSubject({
@@ -262,7 +258,7 @@ function generateChanges(excludeTypes, commitsParsed, useIcons) {
     return changes;
 }
 
-function generateBreakingChanges(changes, breakingChanges, useIcons) {
+function generateBreakingChanges(changes, breakingChanges) {
     changes.push('');
     let breakingChangeTitle = 'КРИТИЧЕСКИЕ ИЗМЕНЕНИЯ';
     changes.push(useIcons ? '### :boom: ' + breakingChangeTitle : '### ' + breakingChangeTitle);

@@ -68,3 +68,5 @@ scopes:
 skips:
   - 'skip'
   - 'skip-ci'
+
+excludeTypes:
