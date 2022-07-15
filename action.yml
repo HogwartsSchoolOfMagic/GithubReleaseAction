@@ -16,7 +16,7 @@ outputs:
   changelog:
     description: Сгенерированные примечания к выпуску
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'
 branding:
   icon: wind
