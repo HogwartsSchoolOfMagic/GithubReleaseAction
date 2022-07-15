@@ -27420,13 +27420,15 @@ function checkingCommitsByConventional(commits) {
                 }
             }
             let scope = cAst.scope ? ` в области ${cAst.scope}` : ``;
-            core.info(`[УСПЕХ] Коммит ${commit.oid} типа ${cAst.type}` + scope + ` - ${cAst.subject}`);
+            core.debug(`[УСПЕХ] Коммит ${commit.oid} типа ${cAst.type}` + scope + ` - ${cAst.subject}`);
         } catch (err) {
             core.warning(
                 `[НЕУДАЧА] Пропуск коммита ${commit.oid} поскольку он не соответствует стандартному формату коммита.`
             );
         }
     }
+    core.info(`Всего найдено валидных коммитов: ${parsed.length}`);
+    core.info(`Всего найдено коммитов с критическими изменениями: ${breaking.length}`);
     return {
         commitsParsed: parsed,
         breakingChanges: breaking
@@ -27485,7 +27487,7 @@ function generateBreakingChanges(changes, breakingChanges, useIcons) {
             subject: breakChange.subject,
             author: breakChange.author
         });
-        changes.push(`- из-за [\`${breakChange.sha.substring(0, 7)}\`](${breakChange.url}) - ${subject}:${body}\n`);
+        changes.push(`- из-за [\`${breakChange.sha.substring(0, 7)}\`](${breakChange.url}) - ${subject}:${body}`);
     }
 
     return changes;
