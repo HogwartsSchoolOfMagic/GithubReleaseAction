@@ -12,7 +12,6 @@ inputs:
   config-path:
     description: Путь до файла конфигурации
     required: false
-    default: './.github/config/default-config.yml'
 outputs:
   changelog:
     description: Сгенерированные примечания к выпуску

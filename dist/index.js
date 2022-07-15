@@ -31139,6 +31139,92 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 1322:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "configFile": () => (/* binding */ configFile)
+/* harmony export */ });
+let configFile = {
+    groups: [
+        {
+            title: 'Новая функциональность',
+            icon: ':sparkles:',
+            version: 'minor',
+            types: ['feat', 'feature']
+        },
+        {
+            title: 'Исправление багов',
+            icon: ':bug:',
+            version: 'patch',
+            types: ['fix', 'bugfix']
+        },
+        {
+            title: 'Повышение производительности',
+            icon: ':zap:',
+            types: ['perf', 'optimize']
+        },
+        {
+            title: 'Рефакторинг',
+            icon: ':recycle:',
+            types: ['refactor', 'code-clean']
+        },
+        {
+            title: 'Тесты',
+            icon: ':white_check_mark:',
+            types: ['test', 'tests']
+        },
+        {
+            title: 'Сборка системы',
+            icon: ':construction_worker:',
+            types: ['build', 'ci']
+        },
+        {
+            title: 'Изменения в документации',
+            icon: ':memo:',
+            types: ['doc', 'docs']
+        },
+        {
+            title: 'Изменения стиля кода',
+            icon: ':art:',
+            types: ['style']
+        },
+        {
+            title: 'Рутина',
+            icon: ':wrench:',
+            types: ['chore']
+        },
+        {
+            title: 'Остальные изменения',
+            icon: ':flying_saucer:',
+            types: ['other']
+        },
+        {
+            title: 'Откат изменений',
+            icon: ':x:',
+            types: ['revert']
+        }
+    ],
+    scopes: [
+        {
+            title: 'Репозиторий',
+            icon: ':card_box:',
+            types: ['repo']
+        },
+        {
+            title: 'Обновление зависимостей',
+            icon: ':chains:',
+            types: ['deps']
+        }
+    ],
+    skips: ['skip', 'skip-ci'],
+    excludeTypes: []
+};
+
+/***/ }),
+
 /***/ 2877:
 /***/ ((module) => {
 
@@ -31303,6 +31389,34 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/node module decorator */
 /******/ 	(() => {
 /******/ 		__nccwpck_require__.nmd = (module) => {
@@ -31320,7 +31434,7 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-/* Используемые библиотеки */
+/* Используемые внешние библиотеки */
 const github = __nccwpck_require__(5438);
 const core = __nccwpck_require__(2186);
 const lodash = __nccwpck_require__(250);
@@ -31328,11 +31442,13 @@ const commitChecker = __nccwpck_require__(4523);
 const yaml = __nccwpck_require__(1917);
 const fs = __nccwpck_require__(7147);
 
+/* Используемые свои библиотеки */
+let { configFile } = __nccwpck_require__(1322)
+
 /* Встроенные настройки */
 const rePrEnding = /\(#(\d+)\)$/;
 
 /* Глобальные данные для выполнения github действия */
-let configFile;
 let owner;
 let repo;
 let gh;
@@ -31345,10 +31461,13 @@ function initVariables() {
     useIcons = core.getBooleanInput('use-icons');
 
     /* Получение конфигурационного файла */
-    try {
-        configFile = yaml.load(fs.readFileSync(core.getInput('config-path'), 'utf8'));
-    } catch (e) {
-        core.warning(e);
+    const configPath = core.getInput('config-path');
+    if (configPath) {
+        try {
+            configFile = yaml.load(fs.readFileSync(configPath, 'utf8'));
+        } catch (e) {
+            core.warning(e);
+        }
     }
 }
 

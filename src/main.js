@@ -1,4 +1,4 @@
-/* Используемые библиотеки */
+/* Используемые внешние библиотеки */
 const github = require('@actions/github');
 const core = require('@actions/core');
 const lodash = require('lodash');
@@ -6,11 +6,13 @@ const commitChecker = require('@conventional-commits/parser');
 const yaml = require('js-yaml');
 const fs = require('fs');
 
+/* Используемые свои библиотеки */
+let { configFile } = require('./lib/defaultConfig')
+
 /* Встроенные настройки */
 const rePrEnding = /\(#(\d+)\)$/;
 
 /* Глобальные данные для выполнения github действия */
-let configFile;
 let owner;
 let repo;
 let gh;
@@ -23,10 +25,13 @@ function initVariables() {
     useIcons = core.getBooleanInput('use-icons');
 
     /* Получение конфигурационного файла */
-    try {
-        configFile = yaml.load(fs.readFileSync(core.getInput('config-path'), 'utf8'));
-    } catch (e) {
-        core.warning(e);
+    const configPath = core.getInput('config-path');
+    if (configPath) {
+        try {
+            configFile = yaml.load(fs.readFileSync(configPath, 'utf8'));
+        } catch (e) {
+            core.warning(e);
+        }
     }
 }
 

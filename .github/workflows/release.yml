@@ -9,7 +9,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: 📦 Checkout
+      - name: 📦 Загрузка содержимого ветки
         uses: actions/checkout@v3
       - name: 🔖 Создание релиза
         uses: HogwartsSchoolOfMagic/GithubReleaseAction@master
