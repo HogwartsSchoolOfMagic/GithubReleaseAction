@@ -179,6 +179,9 @@ function checkingCommitsByConventional(commits) {
     const parsed = [];
     const breaking = []
     for (const commit of commits) {
+        if (commit.message.includes('skip') || commit.message.includes('skip-ci')) {
+            continue;
+        }
         try {
             const cAst = commitChecker.toConventionalChangelogFormat(commitChecker.parser(commit.message));
             // noinspection JSUnresolvedVariable
