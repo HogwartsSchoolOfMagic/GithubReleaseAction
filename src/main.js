@@ -17,7 +17,8 @@ const types = [
     {types: ['doc', 'docs'], header: 'Изменения в документации', icon: ':memo:'},
     {types: ['style'], header: 'Изменения стиля кода', icon: ':art:'},
     {types: ['chore'], header: 'Рутина', icon: ':wrench:'},
-    {types: ['other'], header: 'Остальные изменения', icon: ':flying_saucer:'}
+    {types: ['other'], header: 'Остальные изменения', icon: ':flying_saucer:'},
+    {types: ['revert'], header: 'Откат изменений', icon: ':x:'}
 ];
 
 // Выполнение основной логики github action для создания примечаний к выпуску.
