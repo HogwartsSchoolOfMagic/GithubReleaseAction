@@ -60,10 +60,6 @@ scopes:
     icon: ':chains:'
     types:
       - 'deps'
-  - title: 'Откат изменений'
-    icon: ':chains:'
-    types:
-      - 'revert'
 
 skips:
   - 'skip'
