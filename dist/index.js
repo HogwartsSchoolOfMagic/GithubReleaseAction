@@ -27370,7 +27370,7 @@ async function findReleaseCommits(gh, owner, repo, latestTag) {
             // noinspection JSUnresolvedVariable
             commits.push(commit.node);
 
-            if (latestTag.target.oid === commit.node.oid) {
+            if (latestTag && (latestTag.target.oid === commit.node.oid)) {
                 hasNextPage = false;
                 break;
             }
