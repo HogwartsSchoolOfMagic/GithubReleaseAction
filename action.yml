@@ -5,13 +5,14 @@ inputs:
   gh-token:
     description: Токен GitHub
     required: true
-  exclude-types:
-    description: Типы, которые необходимо исключить из списка изменений. Например, build, docs, style или other
-    required: false
   use-icons:
     description: Флаг, указывающий на то, нужно ли добавлять в заголовки типов изменений соответствующие значки
     required: false
     default: 'true'
+  config-path:
+    description: Путь до файла конфигурации
+    required: false
+    default: './.github/config/default-config.yml'
 outputs:
   changelog:
     description: Сгенерированные примечания к выпуску

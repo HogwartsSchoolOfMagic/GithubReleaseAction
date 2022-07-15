@@ -31346,7 +31346,7 @@ function initVariables() {
 
     /* Получение конфигурационного файла */
     try {
-        configFile = yaml.load(fs.readFileSync('./.github/config/default-config.yml', 'utf8'));
+        configFile = yaml.load(fs.readFileSync(core.getInput('config-path'), 'utf8'));
     } catch (e) {
         core.warning(e);
     }
