@@ -27417,7 +27417,8 @@ function checkingCommitsByConventional(commits) {
                     })
                 }
             }
-            core.info(`[УСПЕХ] Коммит ${commit.oid} типа ${cAst.type} в области ${cAst.scope} - ${cAst.subject}`);
+            let scope = cAst.scope ? ` в области ${cAst.scope}` : ``;
+            core.info(`[УСПЕХ] Коммит ${commit.oid} типа ${cAst.type}` + scope + ` - ${cAst.subject}`);
         } catch (err) {
             core.warning(
                 `[НЕУДАЧА] Пропуск коммита ${commit.oid} поскольку он не соответствует стандартному формату коммита.`
