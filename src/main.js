@@ -2,8 +2,8 @@ const github = require('@actions/github');
 const core = require('@actions/core');
 const lodash = require('lodash');
 const commitChecker = require('@conventional-commits/parser');
-/*const yaml = require('js-yaml');
-const fs   = require('fs');*/
+const yaml = require('js-yaml');
+const fs   = require('fs');
 
 const rePrEnding = /\(#(\d+)\)$/;
 
@@ -226,14 +226,13 @@ function generateChanges(excludeTypes, commitsParsed, useIcons) {
     let idx = 0;
 
     // Get document, or throw exception on error
-    /*let doc;
+    let doc;
     try {
-        doc = yaml.load(fs.readFileSync('./config/default-config.yml', 'utf8'));
-        console.log(JSON.stringify(doc));
+        doc = yaml.load(fs.readFileSync('./.github/config/default-config.yml', 'utf8'));
+        core.info(JSON.stringify(doc));
     } catch (e) {
-        console.log(e);
-        return;
-    }*/
+        core.warning(e);
+    }
 
     for (const type of types) {
         if (lodash.intersection(type.types, excludeTypes).length > 0) {
