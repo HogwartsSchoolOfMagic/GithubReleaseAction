@@ -1,0 +1,23 @@
+name: 'Создание релиза'
+description: 'Создание релиза со списком изменений на основе коммитов по конвенции именования'
+author: Vladislav Kuznetsov
+inputs:
+  gh-token:
+    description: Токен GitHub
+    required: true
+  exclude-types:
+    description: Типы, которые необходимо исключить из списка изменений. Например, build, docs, style или other
+    required: false
+  use-icons:
+    description: Флаг, указывающий на то, нужно ли добавлять в заголовки типов изменений соответствующие значки
+    required: false
+    default: 'true'
+outputs:
+  changelog:
+    description: Сгенерированные примечания к выпуску
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+branding:
+  icon: wind
+  color: red

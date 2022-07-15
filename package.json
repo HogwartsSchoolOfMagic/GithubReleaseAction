@@ -1,0 +1,38 @@
+{
+  "name": "create-release-action",
+  "version": "0.0.1",
+  "description": "GitHub Action для создания примечаний к выпуск из общепринятого стиля коммитов",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HogwartsSchoolOfMagic/GithubReleaseAction.git"
+  },
+  "keywords": [
+    "release-notes",
+    "changelog",
+    "github-actions",
+    "conventional-commits"
+  ],
+  "author": "Vladislav Kuznetsov <smithy-vl@yandex.ru>",
+  "license": "Apache License 2.0",
+  "bugs": {
+    "url": "https://github.com/HogwartsSchoolOfMagic/GithubReleaseAction/issues"
+  },
+  "homepage": "https://github.com/HogwartsSchoolOfMagic/GithubReleaseAction#readme",
+  "dependencies": {
+    "@actions/core": "1.9.0",
+    "@actions/github": "5.0.3",
+    "@conventional-commits/parser": "^0.4.1",
+    "graphql": "^16.5.0",
+    "jquery": "^3.6.0",
+    "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
+    "semver": "^7.3.7"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "0.33.1"
+  }
+}
