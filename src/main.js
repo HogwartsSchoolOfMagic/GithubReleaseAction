@@ -53,17 +53,15 @@ async function main() {
     }
 
     /* Формирование изменений */
-    const changes = generateChanges(excludeTypes, parsedObject.commitsParsed, useIcons);
+    let changes = generateChanges(excludeTypes, parsedObject.commitsParsed, useIcons);
 
     /* Формирование критических изменений */
     let breakingChanges = parsedObject.breakingChanges;
     if (breakingChanges.length > 0) {
-        generateBreakingChanges();
+        changes = generateBreakingChanges(changes, breakingChanges, useIcons);
     }
 
-    if (changes.length > 0) {
-        changes.push('');
-    } else {
+    if (changes.length === 0) {
         return core.warning(
             'Нечего добавлять в список изменений из-за списка исключенных типов сообщений коммитов.'
         );
@@ -122,7 +120,7 @@ async function findCommitPage(gh, owner, repo, endCursor) {
                     }
                     edges {
                       node {
-                        messageHeadline
+                        message
                         oid
                         commitUrl
                         committer {
@@ -182,8 +180,7 @@ function checkingCommitsByConventional(commits) {
     const breaking = []
     for (const commit of commits) {
         try {
-            // noinspection JSUnresolvedVariable
-            const cAst = commitChecker.toConventionalChangelogFormat(commitChecker.parser(commit.messageHeadline));
+            const cAst = commitChecker.toConventionalChangelogFormat(commitChecker.parser(commit.message));
             // noinspection JSUnresolvedVariable
             parsed.push({
                 ...cAst,
@@ -194,12 +191,13 @@ function checkingCommitsByConventional(commits) {
             });
             for (const note of cAst.notes) {
                 if (note.title === 'BREAKING CHANGE') {
+                    // noinspection JSUnresolvedVariable
                     breaking.push({
-                        sha: commit.sha,
-                        url: commit.html_url,
+                        sha: commit.oid,
+                        url: commit.commitUrl,
                         subject: cAst.subject,
-                        author: commit.author.login,
-                        authorUrl: commit.author.html_url,
+                        author: commit.committer.user.login,
+                        authorUrl: commit.committer.user.url,
                         text: note.text
                     })
                 }
@@ -261,7 +259,7 @@ function generateChanges(excludeTypes, commitsParsed, useIcons) {
 }
 
 function generateBreakingChanges(changes, breakingChanges, useIcons) {
-    changes.push('')
+    changes.push('');
     let breakingChangeTitle = 'КРИТИЧЕСКИЕ ИЗМЕНЕНИЯ';
     changes.push(useIcons ? '### :boom: ' + breakingChangeTitle : '### ' + breakingChangeTitle);
     for (const breakChange of breakingChanges) {
@@ -270,8 +268,10 @@ function generateBreakingChanges(changes, breakingChanges, useIcons) {
             subject: breakChange.subject,
             author: breakChange.author
         });
-        changes.push(`- из-за [\`${breakChange.sha.substring(0, 7)}\`](${breakChange.url}) - ${subject}:\n\n${body}\n`);
+        changes.push(`- из-за [\`${breakChange.sha.substring(0, 7)}\`](${breakChange.url}) - ${subject}:${body}\n`);
     }
+
+    return changes;
 }
 
 function buildSubject({subject, author}) {
