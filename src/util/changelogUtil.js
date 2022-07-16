@@ -19,7 +19,7 @@ function generateChanges(configFile, commitsParsed, useIcons) {
             continue;
         }
 
-        const matchingCommits = commitsParsed.filter(commitParsed => group.types.includes(commitParsed.type))
+        const matchingCommits = commitsParsed.filter(commitParsed => group.types.includes(commitParsed.type));
         if (matchingCommits.length < 1) {
             continue;
         }
@@ -28,14 +28,14 @@ function generateChanges(configFile, commitsParsed, useIcons) {
             changes.push('');
         }
 
-        changes.push(useIcons ? `### ${group.icon} ${group.title}` : `### ${group.title}`)
+        changes.push(useIcons ? `### ${group.icon} ${group.title}` : `### ${group.title}`);
         for (const commit of matchingCommits) {
-            const scope = commit.scope ? `**${commit.scope}**: ` : ''
+            const scope = commit.scope ? `**${commit.scope}**: ` : '';
             const subject = buildSubject({
                 subject: commit.subject,
                 author: commit.author
-            })
-            changes.push(`- [\`${commit.sha.substring(0, 7)}\`](${commit.url}) - ${scope}${subject}`)
+            });
+            changes.push(`- [\`${commit.sha.substring(0, 7)}\`](${commit.url}) - ${scope}${subject}`);
         }
         idx++;
     }

@@ -78,4 +78,4 @@ async function main() {
     core.setOutput('changelog', changes.join('\n'));
 }
 
-main().then(() => console.log("Создание релиза завершено!"));
+main().then(() => core.debug("Создание релиза завершено!"));
