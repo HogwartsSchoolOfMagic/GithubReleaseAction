@@ -56,6 +56,10 @@ async function main() {
         );
     }
 
+    const prevVersionRelease = latestTag ? latestTag.name : null;
+    const newVersionRelease = changelogUtil.calculateVersionNumber(parsedObject, configFile, prevVersionRelease);
+    core.info(`Версия нового релиза: ${newVersionRelease}`);
+
     /* Формирование изменений */
     let changes = changelogUtil.generateChanges(configFile, parsedObject.commitsParsed, useIcons);
 

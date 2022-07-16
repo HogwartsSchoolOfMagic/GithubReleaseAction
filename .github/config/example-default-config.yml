@@ -1,11 +1,13 @@
 groups:
   - title: 'Новая функциональность'
     icon: ':sparkles:'
+    version: 'minor'
     types:
       - 'feat'
       - 'feature'
   - title: 'Исправление багов'
     icon: ':bug:'
+    version: 'patch'
     types:
       - 'fix'
       - 'bugfix'

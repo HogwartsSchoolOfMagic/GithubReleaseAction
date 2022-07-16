@@ -31326,7 +31326,8 @@ __nccwpck_require__.r(__webpack_exports__);
 /* harmony export */   "generateChanges": () => (/* binding */ generateChanges),
 /* harmony export */   "generateBreakingChanges": () => (/* binding */ generateBreakingChanges),
 /* harmony export */   "findReleaseCommits": () => (/* binding */ findReleaseCommits),
-/* harmony export */   "checkingCommitsByConventional": () => (/* binding */ checkingCommitsByConventional)
+/* harmony export */   "checkingCommitsByConventional": () => (/* binding */ checkingCommitsByConventional),
+/* harmony export */   "calculateVersionNumber": () => (/* binding */ calculateVersionNumber)
 /* harmony export */ });
 /* Используемые внешние библиотеки */
 const commitChecker = __nccwpck_require__(4523);
@@ -31349,7 +31350,7 @@ function generateChanges(configFile, commitsParsed, useIcons) {
             continue;
         }
 
-        const matchingCommits = commitsParsed.filter(commitParsed => group.types.includes(commitParsed.type))
+        const matchingCommits = commitsParsed.filter(commitParsed => group.types.includes(commitParsed.type));
         if (matchingCommits.length < 1) {
             continue;
         }
@@ -31358,14 +31359,14 @@ function generateChanges(configFile, commitsParsed, useIcons) {
             changes.push('');
         }
 
-        changes.push(useIcons ? `### ${group.icon} ${group.title}` : `### ${group.title}`)
+        changes.push(useIcons ? `### ${group.icon} ${group.title}` : `### ${group.title}`);
         for (const commit of matchingCommits) {
-            const scope = commit.scope ? `**${commit.scope}**: ` : ''
+            const scope = commit.scope ? `**${commit.scope}**: ` : '';
             const subject = buildSubject({
                 subject: commit.subject,
                 author: commit.author
-            })
-            changes.push(`- [\`${commit.sha.substring(0, 7)}\`](${commit.url}) - ${scope}${subject}`)
+            });
+            changes.push(`- [\`${commit.sha.substring(0, 7)}\`](${commit.url}) - ${scope}${subject}`);
         }
         idx++;
     }
@@ -31470,6 +31471,39 @@ function checkingCommitsByConventional(commits) {
         commitsParsed: parsed,
         breakingChanges: breaking
     };
+}
+
+function calculateVersionNumber(parsedObject, configFile, prevVersionNumber) {
+    const prevVersionParts = (prevVersionNumber ? prevVersionNumber : '0.0.0')
+        .replace('v', '')
+        .split('.')
+        .map(versionNumberString => Number(versionNumberString));
+
+    let majorNumber = parsedObject.breakingChanges ? prevVersionParts[0] + 1 : prevVersionParts[0];
+    let minorNumber = prevVersionParts[1];
+    let patchNumber = prevVersionParts[2];
+
+    for (const group of configFile.groups) {
+        const groupVersion = group.version;
+        if (groupVersion) {
+            continue;
+        }
+
+        const matchingCommits = parsedObject.commitsParsed.filter(commitParsed => group.types.includes(commitParsed.type))
+        if (matchingCommits.length < 1) {
+            continue;
+        }
+
+        if (groupVersion === 'patch') {
+            patchNumber = patchNumber + matchingCommits.length;
+        }
+
+        if (groupVersion === 'minor' && minorNumber === 0) {
+            minorNumber = minorNumber + matchingCommits.length;
+        }
+    }
+
+    return 'v' + majorNumber + '.' + minorNumber + '.' + patchNumber;
 }
 
 
@@ -31770,6 +31804,10 @@ async function main() {
         );
     }
 
+    const prevVersionRelease = latestTag ? latestTag.name : null;
+    const newVersionRelease = changelogUtil.calculateVersionNumber(parsedObject, configFile, prevVersionRelease);
+    core.info(`Версия нового релиза: ${newVersionRelease}`);
+
     /* Формирование изменений */
     let changes = changelogUtil.generateChanges(configFile, parsedObject.commitsParsed, useIcons);
 
@@ -31792,7 +31830,7 @@ async function main() {
     core.setOutput('changelog', changes.join('\n'));
 }
 
-main().then(() => console.log("Создание релиза завершено!"));
+main().then(() => core.debug("Создание релиза завершено!"));
 })();
 
 module.exports = __webpack_exports__;

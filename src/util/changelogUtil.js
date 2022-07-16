@@ -142,4 +142,43 @@ function checkingCommitsByConventional(commits) {
     };
 }
 
-export {generateChanges, generateBreakingChanges, findReleaseCommits, checkingCommitsByConventional}
+function calculateVersionNumber(parsedObject, configFile, prevVersionNumber) {
+    const prevVersionParts = (prevVersionNumber ? prevVersionNumber : '0.0.0')
+        .replace('v', '')
+        .split('.')
+        .map(versionNumberString => Number(versionNumberString));
+
+    let majorNumber = parsedObject.breakingChanges ? prevVersionParts[0] + 1 : prevVersionParts[0];
+    let minorNumber = prevVersionParts[1];
+    let patchNumber = prevVersionParts[2];
+
+    for (const group of configFile.groups) {
+        const groupVersion = group.version;
+        if (groupVersion) {
+            continue;
+        }
+
+        const matchingCommits = parsedObject.commitsParsed.filter(commitParsed => group.types.includes(commitParsed.type))
+        if (matchingCommits.length < 1) {
+            continue;
+        }
+
+        if (groupVersion === 'patch') {
+            patchNumber = patchNumber + matchingCommits.length;
+        }
+
+        if (groupVersion === 'minor' && minorNumber === 0) {
+            minorNumber = minorNumber + matchingCommits.length;
+        }
+    }
+
+    return 'v' + majorNumber + '.' + minorNumber + '.' + patchNumber;
+}
+
+export {
+    generateChanges,
+    generateBreakingChanges,
+    findReleaseCommits,
+    checkingCommitsByConventional,
+    calculateVersionNumber
+}
