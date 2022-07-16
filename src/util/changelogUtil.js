@@ -172,7 +172,7 @@ function calculateVersionNumber(parsedObject, configFile, prevVersionNumber) {
         }
     }
 
-    return 'v' + majorNumber + '.' + minorNumber + '.' + patchNumber;
+    return `v${majorNumber}.${minorNumber}.${patchNumber}`;
 }
 
 export {
