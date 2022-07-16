@@ -134,8 +134,8 @@ function checkingCommitsByConventional(commits) {
             );
         }
     }
-    core.info(`Всего найдено валидных коммитов: ${parsed.length}`);
-    core.info(`Всего найдено коммитов с критическими изменениями: ${breaking.length}`);
+    core.debug(`Всего найдено валидных коммитов: ${parsed.length}`);
+    core.debug(`Всего найдено коммитов с критическими изменениями: ${breaking.length}`);
     return {
         commitsParsed: parsed,
         breakingChanges: breaking

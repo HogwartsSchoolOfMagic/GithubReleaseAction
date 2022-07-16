@@ -31464,8 +31464,8 @@ function checkingCommitsByConventional(commits) {
             );
         }
     }
-    core.info(`Всего найдено валидных коммитов: ${parsed.length}`);
-    core.info(`Всего найдено коммитов с критическими изменениями: ${breaking.length}`);
+    core.debug(`Всего найдено валидных коммитов: ${parsed.length}`);
+    core.debug(`Всего найдено коммитов с критическими изменениями: ${breaking.length}`);
     return {
         commitsParsed: parsed,
         breakingChanges: breaking
@@ -31750,9 +31750,9 @@ async function main() {
 
     const latestTag = await githubApi.findLatestTag(gh, owner, repo);
     if (latestTag) {
-        core.info(`Используется, для поиска истории, тэг: ${latestTag.name}, и SHA: ${latestTag.target.oid}.`);
+        core.debug(`Используется, для поиска истории, тэг: ${latestTag.name}, и SHA: ${latestTag.target.oid}.`);
     } else {
-        core.info(`Последний тэг не найден. История формируется на основе коммитов с самого начала.`);
+        core.debug(`Последний тэг не найден. История формируется на основе коммитов с самого начала.`);
     }
 
     /* Поиск истории коммитов */
