@@ -31240,6 +31240,7 @@ __nccwpck_require__.r(__webpack_exports__);
 /* harmony export */   "configFile": () => (/* binding */ configFile)
 /* harmony export */ });
 let configFile = {
+    template: '## Новые изменения\n\n$changes',
     groups: [
         {
             title: 'Новая функциональность',
@@ -31503,7 +31504,7 @@ function calculateVersionNumber(parsedObject, configFile, prevVersionNumber) {
         }
     }
 
-    return 'v' + majorNumber + '.' + minorNumber + '.' + patchNumber;
+    return `v${majorNumber}.${minorNumber}.${patchNumber}`;
 }
 
 
@@ -31531,6 +31532,23 @@ function getFileByPath(filePath) {
         core.warning(e);
         return null;
     }
+}
+
+
+
+/***/ }),
+
+/***/ 2127:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "templateRender": () => (/* binding */ templateRender)
+/* harmony export */ });
+function templateRender(templateFormat, changelog) {
+    const resultChangelog = changelog.join('\n');
+    return templateFormat ? templateFormat.replace('$changes', resultChangelog) : resultChangelog;
 }
 
 
@@ -31755,6 +31773,7 @@ let { configFile } = __nccwpck_require__(669);
 const githubApi = __nccwpck_require__(4339);
 const changelogUtil = __nccwpck_require__(7198);
 const filesUtil = __nccwpck_require__(7767);
+const renderUtil = __nccwpck_require__(2127);
 
 /* Глобальные данные для выполнения github действия */
 let owner;
@@ -31823,11 +31842,9 @@ async function main() {
         );
     }
 
-    changes.forEach(change => {
-        core.info(`${change}`);
-    })
-
-    core.setOutput('changelog', changes.join('\n'));
+    const resultReleaseNotes = renderUtil.templateRender(configFile.template, changes);
+    core.info(`${resultReleaseNotes}`);
+    core.setOutput('changelog', resultReleaseNotes);
 }
 
 main().then(() => core.debug("Создание релиза завершено!"));

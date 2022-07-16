@@ -7,6 +7,7 @@ let { configFile } = require('./config/defaultConfig');
 const githubApi = require('./api/githubApi');
 const changelogUtil = require('./util/changelogUtil');
 const filesUtil = require('./util/filesUtil');
+const renderUtil = require('./util/renderUtil');
 
 /* Глобальные данные для выполнения github действия */
 let owner;
@@ -75,11 +76,9 @@ async function main() {
         );
     }
 
-    changes.forEach(change => {
-        core.info(`${change}`);
-    })
-
-    core.setOutput('changelog', changes.join('\n'));
+    const resultReleaseNotes = renderUtil.templateRender(configFile.template, changes);
+    core.info(`${resultReleaseNotes}`);
+    core.setOutput('changelog', resultReleaseNotes);
 }
 
 main().then(() => core.debug("Создание релиза завершено!"));

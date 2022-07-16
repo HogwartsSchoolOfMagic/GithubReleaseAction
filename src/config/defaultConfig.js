@@ -1,4 +1,5 @@
 export let configFile = {
+    template: '## Новые изменения\n\n$changes',
     groups: [
         {
             title: 'Новая функциональность',
