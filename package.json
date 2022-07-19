@@ -1,5 +1,5 @@
 {
-  "name": "create-release-action",
+  "name": "github-rls-action",
   "version": "0.0.1",
   "description": "GitHub Action для создания примечаний к выпуск из общепринятого стиля коммитов",
   "main": "dist/index.js",

@@ -1,4 +1,4 @@
-name: 'Создание релиза'
+name: 'github-rls-action'
 description: 'Создание релиза со списком изменений на основе коммитов по конвенции именования'
 author: Vladislav Kuznetsov
 inputs:
